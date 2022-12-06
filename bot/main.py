@@ -31,6 +31,8 @@ async def on_command_error(ctx, error):
 
 
 if __name__ == "__main__":
-    bot.load_extension('ext')
+    # load extensions
+    bot.load_extension('ext.run')
+    bot.load_extension('ext.debug')
 
     bot.run(token=DISCORD_TOKEN)
