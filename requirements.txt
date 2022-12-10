@@ -1,2 +1,2 @@
-py-cord[voice,speed]
+py-cord[speed,voice]
 python-dotenv
