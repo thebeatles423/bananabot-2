@@ -28,7 +28,16 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CheckFailure):
         await ctx.reply("You don't have the permissions to use this command!")
         return error
+    else:
+        raise error
 
+# separate error handling for application commands
+@bot.event
+async def on_application_command_error(ctx, error):
+    if isinstance(error, commands.NotOwner):
+        await ctx.send_response("You don't have the permissions to use this command!", ephemeral=True)
+    else:
+        raise error
 
 if __name__ == "__main__":
     # load extensions
