@@ -48,6 +48,8 @@ class Debug(commands.Cog):
         message = message.replace('`', r'\`')
         response = "```\n{}\n```".format(message)
 
+        return await ctx.send_response(response, ephemeral=True)
+
 
 def setup(bot):
     bot.add_cog(Debug(bot))
