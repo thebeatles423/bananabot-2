@@ -43,5 +43,6 @@ if __name__ == "__main__":
     # load extensions
     bot.load_extension('ext.run')
     bot.load_extension('ext.debug')
-
+    bot.load_extension('ext.misc')
+    
     bot.run(token=DISCORD_TOKEN)
