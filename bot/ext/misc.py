@@ -7,8 +7,7 @@ class Misc(commands.Cog):
         self.bot = bot
         self._last_member = None
     
-    @commands.slash_command(name="vc", description="Send a voice chat link without having to use developer mode",
-    guild_ids=[971100780104925224]) # REMOVE THIS
+    @commands.slash_command(name="vc", description="Send a voice chat link without having to use developer mode")
     async def vc(self, ctx, vc_name: str):
         vc_channel = discord.utils.get(ctx.guild.channels, name=vc_name)
         return await ctx.send_response(vc_channel.mention)
