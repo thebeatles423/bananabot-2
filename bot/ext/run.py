@@ -1,10 +1,11 @@
+import asyncio
 import io
 import time
-import discord
-from discord.ext import commands
 import traceback
 from contextlib import redirect_stdout
-import asyncio
+
+import discord
+from discord.ext import commands
 
 # list of supported languages, as their respective file extensions
 supported_languages: list[str, ...] = ['py']

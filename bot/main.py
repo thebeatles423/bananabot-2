@@ -44,5 +44,6 @@ if __name__ == "__main__":
     bot.load_extension('ext.run')
     bot.load_extension('ext.debug')
     bot.load_extension('ext.misc')
+    bot.load_extension('ext.recording')
     
     bot.run(token=DISCORD_TOKEN)

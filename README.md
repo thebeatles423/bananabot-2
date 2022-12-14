@@ -14,7 +14,7 @@ git clone https://github.com/kbidlack/bananabot.git
 ```
 cd bananabot
 ```
-* Optional: Create a virtual environment to install the packages to. You don't have to do this but I highly recommend it because Pycord can clash with other discord libraries (such as Discord<span>.</span>py). Replace `python` with your version of python (e.g. python3):
+* Optional: Create a virtual environment to install the packages to:
 ```
 python -m venv env
 . env/bin/activate

@@ -1,6 +1,6 @@
 import discord
-from discord.ext import commands
 from discord import NotFound
+from discord.ext import commands
 
 
 class Debug(commands.Cog):
