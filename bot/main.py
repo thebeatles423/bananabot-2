@@ -1,4 +1,6 @@
+import pickle
 import os
+import sys
 
 import discord
 from discord.ext import commands
@@ -17,6 +19,14 @@ bot = commands.Bot(command_prefix="b.", intents=intents)
 @bot.event
 async def on_ready():
     print("Bot is connected to discord!")
+
+
+# when the bot shuts down
+def shutdown():
+    print("Bot shutting down... ", end="")
+    print("done.")
+
+    sys.exit()
 
 
 # error handling with various other functionality
@@ -45,5 +55,9 @@ if __name__ == "__main__":
     bot.load_extension('ext.debug')
     bot.load_extension('ext.misc')
     bot.load_extension('ext.recording')
-    
-    bot.run(token=DISCORD_TOKEN)
+    bot.load_extension('ext.reminders')
+
+    try:
+        bot.run(token=DISCORD_TOKEN)
+    except KeyboardInterrupt:
+        shutdown()

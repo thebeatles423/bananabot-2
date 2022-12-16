@@ -22,7 +22,6 @@ async def run_code(ctx, *, code_input: str):
     if language not in supported_languages:
         return await ctx.reply("Unsupported language! Did you format the code correctly?")
     else:
-        print("hi")
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(None, run_in_background, ctx, code_input, language)
         await ctx.reply(result)
