@@ -3,6 +3,16 @@ from discord import NotFound
 from discord.ext import commands
 
 
+class ReadView(discord.ui.View):
+    def __init__(self, msglink):
+        super().__init__()
+
+        self.msglink = msglink
+
+        link_button = discord.ui.Button(label="Message Link", style=discord.ButtonStyle.link, url=self.msglink)
+        self.add_item(link_button)
+
+
 class Debug(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -42,22 +52,12 @@ class Debug(commands.Cog):
         await ctx.send_response("Message sent!", ephemeral=True)
         return await ctx.send(message)
     
-    @commands.message_command(name="Read Message (public)")
-    async def read_public(self, ctx, message: discord.Message):
-        message = message.content
-        message = message.replace('`', r'\`')
-        response = "```\n{}\n```".format(message)
-
-        return await ctx.send_response(response)
-    
-    @commands.message_command(name="Read Message")
-    @commands.is_owner()
+    @commands.message_command(name="Read")
     async def read(self, ctx, message: discord.Message):
-        message = message.content
-        message = message.replace('`', r'\`')
-        response = "```\n{}\n```".format(message)
+        content = message.content
+        response = "```\n{}\n```".format(content.replace('`', r'\`'))
 
-        return await ctx.send_response(response, ephemeral=True)
+        return await ctx.send_response(response, view=ReadView(message.jump_url))
 
 
 def setup(bot):
