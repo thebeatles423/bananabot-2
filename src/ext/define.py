@@ -23,9 +23,12 @@ class Define(commands.Cog):
         response_json = response.json()[0]
 
         # create embed
-        pronunciation = [
-            d for d in response_json['phonetics'] if 'text' in d
-        ][0]['text']
+        if not response_json['phonetics']:
+            pronunciation = "None"
+        else:
+            pronunciation = [
+                d for d in response_json['phonetics'] if 'text' in d
+            ][0]['text']
 
         embed = discord.Embed(
             title=f'Definition of "{word}"',
