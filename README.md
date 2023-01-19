@@ -14,11 +14,6 @@ git clone https://github.com/kbidlack/bananabot.git
 ```
 cd bananabot
 ```
-* Optional: Create a virtual environment to install the packages to:
-```
-python -m venv env
-. env/bin/activate
-```
 * Install the dependencies:
 ```
 pip install -Ur requirements.txt
@@ -29,5 +24,5 @@ DISCORD_TOKEN="<your_token_here>"
 ```
 * Run the bot!
 ```
-python bot/main.py
+python src/main.py
 ```
