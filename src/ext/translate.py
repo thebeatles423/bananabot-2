@@ -10,7 +10,11 @@ class TranslateView(discord.ui.View):
     def __init__(self, msglink, src_lang: str):
         super().__init__()
 
-        link_button = discord.ui.Button(label=f"Message Link ({src_lang})", style=discord.ButtonStyle.link, url=msglink)
+        link_button = discord.ui.Button(
+            label=f"Message Link ({src_lang})",
+            style=discord.ButtonStyle.link,
+            url=msglink
+        )
         self.add_item(link_button)
 
 
@@ -25,7 +29,7 @@ class Translate(commands.Cog):
 
         translated = translator.translate(content, dest='en')
         translated_text = translated.text
-        src_lang = LANGUAGES[translated.src].capitalize()
+        src_lang = LANGUAGES[translated.src.lower()].capitalize()
 
         return await ctx.send_response(
             translated_text,
