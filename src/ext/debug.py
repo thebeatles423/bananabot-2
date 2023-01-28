@@ -3,6 +3,24 @@ from discord import NotFound
 from discord.ext import commands
 
 
+class ReplyModal(discord.ui.Modal):
+    def __init__(self, message: discord.Message, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.message = message
+
+        self.add_item(
+            discord.ui.InputText(
+                label="Message", style=discord.InputTextStyle.long
+            )
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        content = self.children[0].value
+        await interaction.response.send_message("Replied to message!", ephemeral=True)
+        return await self.message.reply(content)
+
+
 class ReadView(discord.ui.View):
     def __init__(self, msglink):
         super().__init__()
@@ -51,6 +69,12 @@ class Debug(commands.Cog):
     async def send(self, ctx, message):
         await ctx.send_response("Message sent!", ephemeral=True)
         return await ctx.send(message)
+
+    @commands.message_command(name="Reply", description="Make the bot reply to a message")
+    @commands.is_owner()
+    async def reply(self, ctx, message: discord.Message):
+        modal = ReplyModal(message, title="Message to reply with:")
+        return await ctx.send_modal(modal)
     
     @commands.message_command(name="Read")
     async def read(self, ctx, message: discord.Message):
