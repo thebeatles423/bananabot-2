@@ -5,8 +5,8 @@ from discord import SlashCommandGroup
 from discord.ext import commands
 
 
-class Recording(commands.Cog):
-    recording = SlashCommandGroup("voice", "Voice channel commands")
+class Voice(commands.Cog):
+    voice = SlashCommandGroup("voice", "Voice channel commands")
 
     def __init__(self, bot):
         self.bot = bot
@@ -14,7 +14,7 @@ class Recording(commands.Cog):
 
         self.connections = {} # vc's the bot is connected to
 
-    @recording.command()
+    @voice.command()
     async def join(self, ctx):
         voice = ctx.author.voice
 
@@ -36,7 +36,7 @@ class Recording(commands.Cog):
 
             return await ctx.send_response(f"Joined <#{vc.channel.id}>!")
 
-    @recording.command()
+    @voice.command()
     async def leave(self, ctx):
         voice = ctx.author.voice
 
@@ -64,10 +64,10 @@ class Recording(commands.Cog):
 
             return await ctx.send_response(f"Left <#{vc.channel.id}>!")
     
-    @recording.command()
+    @voice.command()
     async def record(self, ctx):
         ...
 
 
 def setup(bot):
-    bot.add_cog(Recording(bot))
+    bot.add_cog(Voice(bot))
