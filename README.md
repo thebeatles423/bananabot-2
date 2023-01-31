@@ -1,11 +1,8 @@
 # Bananabot
 A Discord bot with various utilities and other features that I may or may not use in the future
 
-## Invite
-If you'd like, you can invite the bot by clicking on [this](https://discord.com/api/oauth2/authorize?client_id=970138406879395930&permissions=8&scope=bot) link
-
-## Installation
-You can also self host the bot for your own purposes:
+## Usage
+You can self host the bot for your own purposes if you'd like:
 * Clone the repository:
 ```
 git clone https://github.com/kbidlack/bananabot.git
