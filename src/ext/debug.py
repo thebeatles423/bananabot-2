@@ -3,6 +3,28 @@ from discord import NotFound
 from discord.ext import commands
 
 
+class EditModal(discord.ui.Modal):
+    def __init__(self, message: discord.Message, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.message = message
+
+        self.add_item(
+            discord.ui.InputText(
+                label="Message",
+                style=discord.InputTextStyle.long
+            )
+        )
+    
+    async def callback(self, interaction: discord.Interaction):
+        content = self.children[0].value
+        await self.message.edit(content)
+        return await interaction.response.send_message(
+            "Edited message!",
+            ephemeral=True
+        )
+
+
 class ReplyModal(discord.ui.Modal):
     def __init__(self, message: discord.Message, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -17,8 +39,11 @@ class ReplyModal(discord.ui.Modal):
 
     async def callback(self, interaction: discord.Interaction):
         content = self.children[0].value
-        await interaction.response.send_message("Replied to message!", ephemeral=True)
-        return await self.message.reply(content)
+        await self.message.reply(content)
+        return await interaction.response.send_message(
+            "Replied to message!",
+            ephemeral=True
+        )
 
 
 class ReadView(discord.ui.View):
@@ -75,6 +100,19 @@ class Debug(commands.Cog):
     async def reply(self, ctx, message: discord.Message):
         modal = ReplyModal(message, title="Message to reply with:")
         return await ctx.send_modal(modal)
+    
+    @commands.message_command(name="Edit", description="Edit a message the bot has sent")
+    @commands.is_owner()
+    async def edit(self, ctx, message: discord.Message):
+        try:
+            return await ctx.send_modal(
+                EditModal(message, title="Edit message:")
+            )
+        except discord.HTTPException:
+            return await ctx.send_response(
+                "I can't edit this message!",
+                ephemeral=True
+            )
     
     @commands.message_command(name="Read")
     async def read(self, ctx, message: discord.Message):
