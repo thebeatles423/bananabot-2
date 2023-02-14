@@ -6,7 +6,6 @@ import whisper
 from discord.ext import commands
 
 model = whisper.load_model("base")
-print("Model loaded!")
 
 class Captionize(commands.Cog):
     def __init__(self, bot):

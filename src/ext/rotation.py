@@ -1,8 +1,30 @@
-import asyncio
-from datetime import datetime, timedelta
+import time
+from datetime import datetime
 
 import discord
 from discord.ext import commands, tasks
+
+
+class InfiniList(list):
+    """A unique subclass of list that iterates infinitely"""
+    def __init__(self):
+        self.index = 0
+    
+    def __next__(self):
+        if not len(self):
+            return
+        elif self.index == len(self) - 1:
+            item = self[self.index]
+            self.index = 0
+        else:
+            item = self[self.index]
+            self.index += 1
+
+        return item
+    
+    def append(self, item):
+        if item not in self:
+            super().append(item)
 
 
 class Rotation(commands.Cog):
@@ -10,26 +32,20 @@ class Rotation(commands.Cog):
         self.bot = bot
         self._last_member = None
 
-        self.nicknames = {
-            "Monday": {},
-            "Tuesday": {},
-            "Wednesday": {},
-            "Thursday": {},
-            "Friday": {},
-            "Saturday": {},
-            "Sunday": {}
-        }
+        self.nicknames = {}
+
+        self.start()
 
     rotation = discord.SlashCommandGroup("rotation", "Rotate nicknames")
 
     @tasks.loop(hours=24)
     async def nick_loop(self):
         """Update usernames for users in rotation"""
-        to_change_today = self.nicknames[datetime.today().strftime('%A')]
-        for user, nick in to_change_today.items():
+        for user, nicks in self.nicknames.items():
+            nick = next(nicks) or user.display_name
             await user.edit(nick=nick)
 
-    async def restart(self):
+    def start(self):
         now = datetime.now()
         next_midnight = now.replace(
             day=now.day + 1,
@@ -42,48 +58,71 @@ class Rotation(commands.Cog):
         wait_time = next_midnight - now
 
         # wait for the next day
-        await asyncio.sleep(wait_time.seconds + 5)
-        self.nick_loop.cancel()
+        time.sleep(wait_time.seconds)
         self.nick_loop.start()
-
-    async def days(ctx: discord.AutocompleteContext):
-        return [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ]
 
     @rotation.command()
     async def add(
-        self, ctx,
+        self,
+        ctx,
         user: discord.SlashCommandOptionType.user,
-        when: discord.Option(
-            str,
-            autocomplete=discord.utils.basic_autocomplete(days)
-        ),
         nick: str
     ):
-        if when not in await self.days():
+        if len(nick) > 32:
             return await ctx.send_response(
-                "Invalid date!",
+                "That nickname is too long!",
                 ephemeral=True
             )
-        elif len(nick) > 32:
+        elif user not in self.nicknames:
+            self.nicknames[user] = InfiniList()
+            self.nicknames[user].append(nick)
+        else:
+            self.nicknames[user].append(nick)
+        
+        return await ctx.send_response(
+            f"Added nickname `{nick}` for {user.mention}"
+        )
+    
+    @rotation.command()
+    async def remove(
+        self,
+        ctx,
+        user: discord.SlashCommandOptionType.user,
+        nick: str
+    ):
+        if user not in self.nicknames:
             return await ctx.send_response(
-                "Nickname provided is too long!",
+                "That user does not have any nicknames!",
+                ephemeral=True
+            )
+        elif nick not in self.nicknames[user]:
+            return await ctx.send_response(
+                "That user does not have that nickname!",
                 ephemeral=True
             )
         else:
-            self.nicknames[when].update({user: nick}) 
-            await ctx.send_response(
-                f"Nickname `{nick}` for {user.mention} added on **{when}**"
+            self.nicknames[user].remove(nick)
+            return await ctx.send_response(
+                f"Removed nickname `{nick}` for {user.mention}"
             )
-
-            return await self.restart()
+    
+    @rotation.command()
+    async def view(
+        self,
+        ctx,
+        user: discord.SlashCommandOptionType.user
+    ):
+        if user not in self.nicknames or not self.nicknames[user]:
+            return await ctx.send_response(
+                f"{user.mention} has no nicknames in rotation!",
+                ephemeral=True
+            )
+        else:
+            reply = f"{user.mention} has the following nicknames:\n"
+            for nick in self.nicknames[user]:
+                reply += f"`{nick}`\n"
+            
+            return await ctx.send_response(reply)
 
 
 def setup(bot):
