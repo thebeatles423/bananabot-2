@@ -34,6 +34,8 @@ class Rotation(commands.Cog):
 
         self.nicknames = {}
 
+        self.start()
+
     rotation = discord.SlashCommandGroup("rotation", "Rotate nicknames")
 
     @tasks.loop(hours=24)
@@ -53,10 +55,7 @@ class Rotation(commands.Cog):
             microsecond=0
         )
 
-        wait_time = next_midnight - now
-
-        # wait for the next day
-        time.sleep(wait_time.seconds)
+        self.nick_loop._next_iteration = next_midnight
         self.nick_loop.start()
 
     @rotation.command()
@@ -80,9 +79,6 @@ class Rotation(commands.Cog):
         await ctx.send_response(
             f"Added nickname `{nick}` for {user.mention}"
         )
-        
-        if not self.nick_loop.is_running():
-            self.start()
     
     @rotation.command()
     async def remove(
