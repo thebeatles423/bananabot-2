@@ -1,5 +1,8 @@
-import time
+import asyncio
+import os
+import pickle
 from datetime import datetime
+from pathlib import Path
 
 import discord
 from discord.ext import commands, tasks
@@ -32,7 +35,12 @@ class Rotation(commands.Cog):
         self.bot = bot
         self._last_member = None
 
-        self.nicknames = {}
+        self.SAVE_DIR = os.path.join(
+            Path.home(),
+            ".cache",
+            "bananabot"
+        )
+        self.SAVE_FP = os.path.join(self.SAVE_DIR, "nicknames.pkl")
 
         self.start()
 
@@ -41,9 +49,12 @@ class Rotation(commands.Cog):
     @tasks.loop(hours=24)
     async def nick_loop(self):
         """Update usernames for users in rotation"""
+        await self.load_nicknames()
+
         for user, nicks in self.nicknames.items():
             nick = next(nicks) or user.display_name
             await user.edit(nick=nick)
+
 
     def start(self):
         now = datetime.now()
@@ -57,6 +68,37 @@ class Rotation(commands.Cog):
 
         self.nick_loop._next_iteration = next_midnight
         self.nick_loop.start()
+    
+    def save_nicknames(self):
+        self.id_nicknames = {}
+        
+        for user, nicks in self.nicknames.items():
+            self.id_nicknames[user.id] = nicks
+        
+        with open(self.SAVE_FP, 'wb') as file:
+            pickle.dump(self.id_nicknames, file)
+
+    async def load_nicknames(self):
+        # wait for bot to load
+        await asyncio.sleep(30)
+
+        if not os.path.isdir(self.SAVE_DIR):
+            os.mkdir(self.SAVE_DIR)
+            self.nicknames = {}
+        elif not (os.path.isfile(self.SAVE_FP)):
+            self.nicknames = {}
+        else:
+            with open(self.SAVE_FP, 'rb') as file:
+                self.nicknames = {}
+                self.id_nicknames = pickle.load(file)
+            
+            for userid, nicks in self.id_nicknames.items():
+                for member in self.bot.get_all_members():
+                    if member.id == userid:
+                        user = member
+                        
+                self.nicknames[user] = nicks
+
 
     @rotation.command()
     async def add(
@@ -79,6 +121,8 @@ class Rotation(commands.Cog):
         await ctx.send_response(
             f"Added nickname `{nick}` for {user.mention}"
         )
+
+        self.save_nicknames()
     
     @rotation.command()
     async def remove(
@@ -88,20 +132,22 @@ class Rotation(commands.Cog):
         nick: str
     ):
         if user not in self.nicknames:
-            return await ctx.send_response(
+            await ctx.send_response(
                 "That user does not have any nicknames!",
                 ephemeral=True
             )
         elif nick not in self.nicknames[user]:
-            return await ctx.send_response(
+            await ctx.send_response(
                 "That user does not have that nickname!",
                 ephemeral=True
             )
         else:
             self.nicknames[user].remove(nick)
-            return await ctx.send_response(
+            await ctx.send_response(
                 f"Removed nickname `{nick}` for {user.mention}"
             )
+        
+        return self.save_nicknames()
     
     @rotation.command()
     async def view(
