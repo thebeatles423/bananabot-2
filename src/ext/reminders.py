@@ -105,7 +105,6 @@ class Reminder:
 class Reminders(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
 
         # if there are reminders saved to disk, load them --
         # these are stored if the bot shuts down and reminders

@@ -21,7 +21,6 @@ class TranslateView(discord.ui.View):
 class Translate(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
 
     @commands.message_command(name="Translate")
     async def translate(self, ctx, message: discord.Message):

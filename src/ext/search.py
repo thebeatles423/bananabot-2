@@ -29,7 +29,6 @@ class Search(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
 
     @commands.message_command(name="Image Text")
     async def image_text(self, ctx, message: discord.Message):

@@ -65,7 +65,6 @@ class ReadView(discord.ui.View):
 class Debug(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._last_member = None
 
     @commands.slash_command(name="listexts", description="List loaded extensions")
     @commands.is_owner()
