@@ -4,15 +4,21 @@ from discord.ext import commands
 
 
 class EditModal(discord.ui.Modal):
-    def __init__(self, message: discord.Message, *args, **kwargs):
+    def __init__(
+        self, 
+        message: discord.Message,
+        *args,
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
 
         self.message = message
-
+        
         self.add_item(
             discord.ui.InputText(
                 label="Message",
-                style=discord.InputTextStyle.long
+                style=discord.InputTextStyle.long,
+                value=self.message.content
             )
         )
     
