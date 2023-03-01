@@ -1,7 +1,5 @@
-import asyncio
 import os
 import pickle
-from datetime import datetime
 from pathlib import Path
 
 import discord
@@ -41,33 +39,25 @@ class Rotation(commands.Cog):
         )
         self.SAVE_FP = os.path.join(self.SAVE_DIR, "nicknames.pkl")
 
-        self.start()
+        self.nick_loop.start()
 
     rotation = discord.SlashCommandGroup("rotation", "Rotate nicknames")
 
     @tasks.loop(hours=24)
     async def nick_loop(self):
         """Update usernames for users in rotation"""
-        await self.load_nicknames()
 
         for user, nicks in self.nicknames.items():
             nick = next(nicks) or user.display_name
             await user.edit(nick=nick)
 
+    @nick_loop.before_loop
+    async def before_nick_loop(self):
+        await self.bot.wait_until_ready()
 
-    def start(self):
-        now = datetime.now()
-        next_midnight = now.replace(
-            day=now.day + 1,
-            hour=0,
-            minute=0,
-            second=0,
-            microsecond=0
-        )
+        await self.load_nicknames()
+        await self.update_nicknames()
 
-        self.nick_loop._next_iteration = next_midnight
-        self.nick_loop.start()
-    
     def save_nicknames(self):
         self.id_nicknames = {}
         
@@ -78,9 +68,6 @@ class Rotation(commands.Cog):
             pickle.dump(self.id_nicknames, file)
 
     async def load_nicknames(self):
-        # wait for bot to load
-        await asyncio.sleep(30)
-
         if not os.path.isdir(self.SAVE_DIR):
             os.mkdir(self.SAVE_DIR)
             self.nicknames = {}
@@ -90,13 +77,14 @@ class Rotation(commands.Cog):
             with open(self.SAVE_FP, 'rb') as file:
                 self.nicknames = {}
                 self.id_nicknames = pickle.load(file)
-            
-            for userid, nicks in self.id_nicknames.items():
-                for member in self.bot.get_all_members():
-                    if member.id == userid:
-                        user = member
-                        
-                self.nicknames[user] = nicks
+    
+    async def update_nicknames(self):
+        for userid, nicks in self.id_nicknames.items():
+            for member in self.bot.get_all_members():
+                if member.id == userid:
+                    user = member
+                    
+            self.nicknames[user] = nicks
 
 
     @rotation.command()
@@ -165,6 +153,42 @@ class Rotation(commands.Cog):
                 reply += f"`{nick}`\n"
             
             return await ctx.send_response(reply)
+    
+    @rotation.command()
+    async def next(self, ctx):
+        return await ctx.send_response(
+            f"Next iteration: <t:{round(self.nick_loop.next_iteration.timestamp())}:R>",
+            ephemeral=True
+        )
+    
+    @commands.is_owner()
+    @rotation.command()
+    async def set(
+        self,
+        ctx,
+        days: discord.Option(int, default=0),
+        hours: discord.Option(int, default=0),
+        minutes: discord.Option(int, default=0),
+        seconds: discord.Option(int, default=0)
+    ):  
+        if any(x < 0 for x in (hours, minutes, seconds)):
+            return await ctx.send_response(
+                "Invalid time!",
+                ephemeral=True
+            )
+
+        adjusted_hours = hours + days * 24
+        self.nick_loop.change_interval(
+            hours=adjusted_hours,
+            minutes=minutes,
+            seconds=seconds
+        )
+
+        response = f"Set rotation interval to: {days} days, {hours}:{minutes}:{seconds}"
+        
+        await ctx.send_response(response, ephemeral=True)
+
+        self.nick_loop.restart()
 
 
 def setup(bot):
