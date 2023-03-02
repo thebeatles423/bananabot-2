@@ -2,7 +2,6 @@ import sys
 
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
 
 # create bot
 intents = discord.Intents.all()
@@ -43,13 +42,19 @@ async def on_application_command_error(ctx, error):
     else:
         raise error
 
-bananabot.load_extension('ext.run')
-bananabot.load_extension('ext.misc')
-bananabot.load_extension('ext.debug')
-bananabot.load_extension('ext.voice')
-bananabot.load_extension('ext.search')
-bananabot.load_extension('ext.define')
-bananabot.load_extension('ext.rotation')
-bananabot.load_extension('ext.translate')
-bananabot.load_extension('ext.captionize')
-#bananabot.load_extension('ext.reminders')
+extensions = [
+    "captionize",
+    "debug",
+    "define",
+    "message",
+    "misc",
+    #"reminders",
+    "rotation",
+    "run",
+    "search",
+    "translate",
+    "voice",
+]
+
+for extension in extensions:
+    bananabot.load_extension(f"ext.{extension}")
