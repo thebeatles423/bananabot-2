@@ -1,5 +1,7 @@
+import os
+import sys
+
 import discord
-from discord import NotFound
 from discord.ext import commands
 
 
@@ -125,6 +127,32 @@ class Debug(commands.Cog):
         response = "```\n{}\n```".format(content.replace('`', r'\`'))
 
         return await ctx.send_response(response, view=ReadView(message.jump_url))
+    
+
+    @commands.slash_command(
+            name="shutdown",
+            description="Shuts down the bot"
+    )
+    @commands.is_owner()
+    async def shutdown(self, ctx):
+        await ctx.send_response("Shutting down!", ephemeral=True)
+        await self.bot.close()
+
+    @commands.slash_command(
+        name="update",
+        description="Pull from the git repository"
+    )
+    @commands.is_owner()
+    async def update(self, ctx):
+        script_dir = os.path.dirname(
+            os.path.realpath(__file__)
+        )
+
+        os.chdir(script_dir)
+        os.chdir('..')
+
+        await ctx.send_response("Updating bot!", ephemeral=True)
+        os.system("git pull origin main &> /dev/null")
 
 
 def setup(bot):
