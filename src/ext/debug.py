@@ -1,5 +1,6 @@
 import os
 
+import git
 from discord.ext import commands
 
 
@@ -50,10 +51,12 @@ class Debug(commands.Cog):
             )
     
 
-    @commands.slash_command(name="shutdown", description="Shuts down the bot")
+    @commands.slash_command(name="restart", description="Restart the bot")
     @commands.is_owner()
     async def shutdown(self, ctx):
-        await ctx.send_response("Shutting down!", ephemeral=True)
+        """Restart the bot. Assumes a systemctl service will restart it on-success"""
+
+        await ctx.send_response("Restarting!", ephemeral=True)
         await self.bot.close()
 
     @commands.slash_command(name="update", description="Pull from the git repository")
@@ -64,10 +67,13 @@ class Debug(commands.Cog):
         )
 
         os.chdir(script_dir)
-        os.chdir('..')
+        repo = git.Repo('../..')
 
-        await ctx.send_response("Updating bot!", ephemeral=True)
-        os.system("git pull origin main &> /dev/null")
+        try:
+            repo.remotes.origin.pull()
+            await ctx.send_response("Updated bot!", ephemeral=True)
+        except Exception as e:
+            await ctx.send_response(f"Failed to update bot!\n```{e}```", ephemeral=True)
 
 
 def setup(bot):

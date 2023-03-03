@@ -1,10 +1,7 @@
-import datetime
 import io
-from contextlib import redirect_stdout
 
 import discord
 import pytesseract
-from discord import SlashCommandGroup
 from discord.ext import commands
 from PIL import Image
 
