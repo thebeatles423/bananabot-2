@@ -60,6 +60,22 @@ class Misc(commands.Cog):
                 ephemeral=True
             )
 
+    @commands.is_owner()
+    @autodelete.command()
+    async def list(self, ctx):
+        if not self.autodeletes:
+            await ctx.send_response(
+                "There are no users in autodelete!",
+                ephemeral=True
+            )
+        else:
+            response = "Users in autodelete:\n"
+
+            for user in self.autodeletes:
+                response += user.mention + '\n'
+
+            await ctx.send_response(response, ephemeral=True)
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author in self.autodeletes:
