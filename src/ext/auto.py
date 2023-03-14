@@ -91,7 +91,7 @@ class Autonick(commands.Cog):
         else:
             try:
                 await user.edit(nick=nick)
-            except:
+            except discord.Forbidden:
                 return await ctx.send_response(
                     f"I can't nickname {user.mention}!",
                     ephemeral=True
@@ -141,6 +141,84 @@ class Autonick(commands.Cog):
             await after.edit(nick=self.autonicks[after])
 
 
+class Autorole(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        
+        self.autoroles = {}
+    
+    autorole = discord.SlashCommandGroup("autorole")
+    
+    @commands.is_owner()
+    @autorole.command()
+    async def add(self, ctx, user: discord.Member, role: discord.SlashCommandOptionType.role):
+        if user in self.autoroles:
+            await ctx.send_response(
+                f"{user.mention} is already in autoroles!",
+                ephemeral=True
+            )
+        elif user in self.autoroles and role != self.autoroles[user]:
+            self.autoroles[user] = role
+            await user.add_roles(role)
+        elif user in self.autoroles and role == self.autoroles[user]:
+            await ctx.send_response(
+                f"{user.mention} already has the role {role}!",
+                ephemeral=True
+            )
+        else:
+            try:
+                await user.add_roles(role)
+            except discord.Forbidden:
+                return await ctx.send_response(
+                    f"I can't change roles for {user.mention}!",
+                    ephemeral=True
+                )
+            self.autoroles.update({user: role})
+
+            await ctx.send_response(
+                f"Added {user.mention} to autoroles!",
+                ephemeral=True
+            )
+    
+    @commands.is_owner()
+    @autorole.command()
+    async def remove(self, ctx, user: discord.Member):
+        if user not in self.autoroles:
+            await ctx.send_response(
+                f"{user.mention} is not in autoroles!",
+                ephemeral=True
+            )
+        else:
+            del self.autoroles[user]
+
+            await ctx.send_response(
+                f"Removed {user.mention} from autoroles!",
+                ephemeral=True
+            )
+
+    @commands.is_owner()
+    @autorole.command()
+    async def list(self, ctx):
+        if not self.autoroles:
+            await ctx.send_response(
+                "There are no users in autorole!",
+                ephemeral=True
+            )
+        else:
+            response = "Users in autorole:\n"
+
+            for user in self.autoroles:
+                response += f"{user.mention}: {self.autoroles[user]}\n"
+
+            await ctx.send_response(response, ephemeral=True)
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        if before in self.autoroles or after in self.autoroles:
+            await after.add_roles(self.autoroles[after])
+
+
 def setup(bot):
     bot.add_cog(Autodelete(bot))
     bot.add_cog(Autonick(bot))
+    bot.add_cog(Autorole(bot))
