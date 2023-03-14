@@ -43,6 +43,7 @@ async def on_application_command_error(ctx, error):
         raise error
 
 extensions = [
+    "auto",
     "captionize",
     "debug",
     "define",
