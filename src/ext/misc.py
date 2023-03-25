@@ -24,6 +24,22 @@ class Misc(commands.Cog):
                 ephemeral=True
             )
 
+    @commands.is_owner()
+    @commands.slash_command() 
+    async def af2023(self, ctx: discord.ApplicationContext, nick: str, role: discord.SlashCommandOptionType.role):
+        for member in ctx.guild.members:
+            try:
+                await member.add_roles(role)
+                await member.edit(nick=nick)
+
+                ctx.bot.cogs["Autorole"].autoroles.update({member: role})
+                ctx.bot.cogs["Autonick"].autonicks.update({member: nick})
+            except:
+                pass # hehe
+        
+        await ctx.send_response("Done! (:")
+        
+
 
 def setup(bot):
     bot.add_cog(Misc(bot))
