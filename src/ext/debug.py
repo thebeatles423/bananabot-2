@@ -1,6 +1,7 @@
 import os
 
 import git
+import discord
 from discord.ext import commands
 
 
@@ -42,6 +43,11 @@ class Debug(commands.Cog):
             self.bot.load_extension(extension)
             return await ctx.send_response(
                 f"Loaded extension `{extension}`",
+                ephemeral=True
+            )
+        except discord.errors.ApplicationCommandInvokeError:
+            return await ctx.send_response(
+                f"Extension `{extension}` has already been loaded!",
                 ephemeral=True
             )
         except:

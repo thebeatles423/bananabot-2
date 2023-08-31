@@ -38,7 +38,11 @@ class Misc(commands.Cog):
                 pass # hehe
         
         await ctx.send_response("Done! (:")
-        
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if "guys" in message.content.lower() and not message.author.bot:
+            return await message.reply("Hi! 'Guys' is a gendered pronoun. We recommend alternatives like 'folks', 'all', 'everyone', 'y'all', 'team', 'crew' etc. We appreciate your help in building an inclusive space in the Official Design Technology High School Cross Country Discord Server.")
 
 
 def setup(bot):
